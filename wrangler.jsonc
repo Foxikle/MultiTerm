@@ -1,15 +1,23 @@
 {
-	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "multiterm",
-	"compatibility_date": "2026-04-27",
-	"compatibility_flags": [
-		"nodejs_als"
-	],
-	"main": ".svelte-kit/cloudflare/_worker.js",
-	"assets": {
-		"binding": "ASSETS",
-		"directory": ".svelte-kit/cloudflare"
-	},
-	"workers_dev": true,
-	"preview_urls": true
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "multiterm",
+  "compatibility_date": "2026-04-27",
+  "compatibility_flags": [
+    "nodejs_als"
+  ],
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".svelte-kit/cloudflare"
+  },
+  "workers_dev": true,
+  "preview_urls": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "multiterm",
+      "database_id": "8994737e-c429-468c-805e-227607d70ba5",
+      "remote": true
+    }
+  ]
 }
