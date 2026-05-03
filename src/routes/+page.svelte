@@ -392,20 +392,17 @@
   <div class="flex flex-col justify-center items-center my-6">
     <div
       id="content"
-      class="bg-terminal sm:max-w-[75vw] sm:min-w-[75vw] max-h-[60vh] min-h-[60vh] p-6 pb-3 rounded shadow-xl flex flex-col"
+      class="bg-terminal sm:max-w-[75vw] sm:min-w-[75vw] max-h-[60vh] overflow-y-scroll no-scrollbar min-h-[60vh] p-6 pb-3 rounded shadow-xl flex flex-col justify-end"
     >
-      <div
-        class="min-h-0 flex-1 overflow-y-auto flex flex-col justify-end no-scrollbar"
-      >
-        {#each messages as msg}
-          <span class="flex flex-row">
-            <pre class="font-code text-secondary">{msg.content}</pre>
-            {#if msg.count > 1}
-              <h1 class="font-code ml-1 text-secondary/50">({msg.count})</h1>
-            {/if}
-          </span>
-        {/each}
-      </div>
+      {#each messages as msg}
+        <span class="flex flex-row">
+          <pre
+            class="font-code whitespace-pre-wrap wrap-break-word text-secondary">{msg.content}</pre>
+          {#if msg.count > 1}
+            <h1 class="font-code ml-1 text-secondary/50">({msg.count})</h1>
+          {/if}
+        </span>
+      {/each}
       <div id="input">
         <input
           onkeydown={(e) => {
