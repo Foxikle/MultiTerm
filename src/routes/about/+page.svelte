@@ -30,7 +30,12 @@
         This project runs on the Cloudflare workers platform using D1 for state
         persistence. Each time a "command" is run, a request is sent to the
         worker to mutate the state and reply with the new state. No data is
-        stored locally.
+        stored locally. The code is open source, if you care to peruse it. It
+        can be found on <a
+          class="underline"
+          target="_blank"
+          href="https://github.com/Foxikle/MultiTerm">GitHub</a
+        >.
       </p>
     </span>
     <span>
