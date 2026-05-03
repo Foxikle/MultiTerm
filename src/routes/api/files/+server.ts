@@ -32,7 +32,8 @@ export async function POST({ request, platform }) {
   try {
     let path = request.headers.get("x-file-path")
     let content = request.headers.get("x-file-content")
-    if (!path || !content) {
+    if (!content) content = ""
+    if (!path) {
       return Response.json({
         success: false,
         "detail": "File path or content is missing"
