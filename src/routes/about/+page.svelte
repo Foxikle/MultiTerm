@@ -27,10 +27,10 @@
       <h1 class="mt-6 mb-2 text-2xl">Tech Stack</h1>
       <p class="text-secondary">
         As an infrastructure enthusiast, I'm always happy to talk tech stacks!
-        This project runs on the Cloudflare workers platform using Durable
-        Objects for state persistence. Each time a "command" is run, a request
-        is sent to the worker to mutate the state and reply with the new state.
-        No data is stored locally.
+        This project runs on the Cloudflare workers platform using D1 for state
+        persistence. Each time a "command" is run, a request is sent to the
+        worker to mutate the state and reply with the new state. No data is
+        stored locally.
       </p>
     </span>
     <span>
