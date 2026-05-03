@@ -15,8 +15,6 @@
     count: number;
   }
 
-  const SUFFIX_REGEX = /.* \(.*[2-9]\)$/;
-
   const PARSE_FAILED: ParsedCommand = {
     async execute(_: string[]): Promise<ExecutionResult> {
       return {
@@ -38,6 +36,15 @@
             data: [],
           };
         }
+
+        if (!args[0].startsWith("/")) {
+          return {
+            success: false,
+            detail: "File paths must be absolute (Start with /)",
+            data: [],
+          };
+        }
+
         let content: string = "";
         if (args.length > 1) {
           content = args.slice(1).join(" ");
@@ -63,6 +70,188 @@
           success: false,
           detail: data.detail,
           data: [],
+        };
+      },
+    },
+    tee: {
+      async execute(args: string[]): Promise<ExecutionResult> {
+        if (args.length < 2) {
+          return {
+            success: false,
+            detail:
+              'Missing argument: File name and/or content. Usage: "tee <filename> <content>"',
+            data: [],
+          };
+        }
+        let content: string = "";
+        if (args.length > 1) {
+          content = args.slice(1).join(" ");
+        }
+        const resp: Response = await fetch("/api/files/", {
+          method: "PUT",
+          headers: {
+            "X-File-Path": args[0],
+            "X-File-Content": content,
+          },
+        });
+
+        const data = await resp.json();
+        console.log(data);
+        if (resp.ok) {
+          return {
+            success: true,
+            data: [data.detail],
+          };
+        }
+
+        return {
+          success: false,
+          detail: data.detail,
+          data: [],
+        };
+      },
+    },
+    cat: {
+      async execute(args: string[]): Promise<ExecutionResult> {
+        if (args.length < 1) {
+          return {
+            success: false,
+            detail: 'Missing argument: File name. Usage "cat <filename>"',
+            data: [],
+          };
+        }
+
+        if (args[0].endsWith("/")) {
+          return {
+            success: false,
+            detail:
+              'Cat only works on files, not directories. Use "ls" to list the files in a directory.',
+            data: [],
+          };
+        }
+
+        const resp: Response = await fetch("/api/files/", {
+          method: "GET",
+          headers: {
+            "X-File-Path": args[0],
+          },
+        });
+
+        const data = await resp.json();
+
+        if (resp.ok) {
+          return {
+            success: true,
+            data: [data.data.content],
+          };
+        }
+
+        return {
+          success: false,
+          detail: data.detail,
+          data: [],
+        };
+      },
+    },
+    ls: {
+      async execute(args: string[]): Promise<ExecutionResult> {
+        let path = "/";
+        if (args.length >= 1) {
+          path = args[0];
+        }
+
+        if (!path.endsWith("/")) {
+          return {
+            success: false,
+            detail:
+              'Ls only works with directories. Use "cat" to print out a file.',
+            data: [],
+          };
+        }
+
+        const resp: Response = await fetch("/api/files/", {
+          method: "GET",
+          headers: {
+            "X-File-Path": args[0],
+          },
+        });
+
+        const data = await resp.json();
+
+        for (const line of renderTree(buildTree(data.data), "", true)) {
+          pushMessage(line);
+        }
+
+        if (resp.ok) {
+          return {
+            success: true,
+            data: [data.detail],
+          };
+        }
+
+        return {
+          success: false,
+          detail: data.detail,
+          data: [],
+        };
+      },
+    },
+    rm: {
+      async execute(args: string[]): Promise<ExecutionResult> {
+        if (args.length < 1) {
+          return {
+            success: false,
+            detail: 'Missing argument: File name. Usage "rm <filename>"',
+            data: [],
+          };
+        }
+        const resp: Response = await fetch("/api/files/", {
+          method: "DELETE",
+          headers: {
+            "X-File-Path": args[0],
+          },
+        });
+
+        const data = await resp.json();
+
+        if (resp.ok) {
+          return {
+            success: true,
+            data: [data.detail],
+          };
+        }
+
+        return {
+          success: false,
+          detail: data.detail,
+          data: [],
+        };
+      },
+    },
+    clear: {
+      async execute(_: string[]): Promise<ExecutionResult> {
+        messages.splice(0);
+        return {
+          success: true,
+          data: [],
+        };
+      },
+    },
+    help: {
+      async execute(_: string[]): Promise<ExecutionResult> {
+        return {
+          success: true,
+          data: [
+            "Available Commands:",
+            "- touch <file> [contents] - Create a new file with the specified path and optional contents.",
+            "- clear - Clear the contents of this terminal",
+            "- cat <file> - Print out of the contents of the specified file",
+            "- rm <file> - Delete the specified file",
+            "- tee <file> <contents> - Write the specified contents to the specified file",
+            "- chtag <add/remove> <file> <tags...> - Modify a file's tags",
+            "- ls [query] - List the files in the specified directory. (Defaults to root)",
+            "- help - Prints out this message :)",
+          ],
         };
       },
     },
@@ -116,7 +305,6 @@
     result.data.forEach((element) => {
       pushMessage(element);
     });
-    console.log(result);
   }
 
   function parseCommand(value: string): ParsedCommand {
@@ -129,9 +317,62 @@
     cmd.parsedArgs = split.slice(1);
     return cmd;
   }
+
+  function buildTree(files: any[]): any {
+    // null is a leaf
+    // {} is a branch
+    let root = {};
+
+    for (const file of files) {
+      const parts = file.path.split("/");
+      let node = root;
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        if (!node[part]) {
+          node[part] = i === parts.length - 1 ? null : {};
+        }
+        if (node[part] !== null) {
+          node = node[part];
+        }
+      }
+    }
+
+    console.log(root);
+    return root;
+  }
+
+  function renderTree(node: any, prefix = "", isRoot = true) {
+    const lines = [];
+
+    if (isRoot) lines.push("/");
+
+    const entries = Object.entries(node).sort(([aKey, aVal], [bKey, bVal]) => {
+      const aDir = aVal !== null;
+      const bDir = bVal !== null;
+      if (aDir !== bDir) return aDir ? -1 : 1;
+      return aKey.localeCompare(bKey);
+    });
+
+    entries.forEach(([name, children], idx) => {
+      const suffix = children !== null ? "/" : "";
+      const isLast = idx === entries.length - 1;
+      const char = isLast ? "+--" : "+--";
+      const childPrefix = prefix + (isLast ? "    " : "│    ");
+
+      if (name !== "") {
+        lines.push(prefix + char + name + suffix);
+      }
+
+      if (children !== null) {
+        lines.push(...renderTree(children, childPrefix, false));
+      }
+    });
+
+    return lines;
+  }
 </script>
 
-<div class="min-h-screen bg-bg">
+<div class="min-h-screen bg-bg no-scrollbar">
   <header
     class="block w-screen text-center text-6xl text-primary p-6 font-title text-shadow-sm text-shadow-muted"
   >
@@ -140,9 +381,11 @@
   <div class="flex flex-col justify-center items-center my-6">
     <div
       id="content"
-      class="bg-terminal sm:max-w-[75vw] sm:min-w-[75vw] min-h-[60vh] overflow-y-scroll no-scrollbar p-6 pb-3 rounded shadow-xl flex flex-col justify-end"
+      class="bg-terminal sm:max-w-[75vw] sm:min-w-[75vw] max-h-[60vh] min-h-[60vh] p-6 pb-3 rounded shadow-xl flex flex-col"
     >
-      <span>
+      <div
+        class="min-h-0 flex-1 overflow-y-auto flex flex-col justify-end no-scrollbar"
+      >
         {#each messages as msg}
           <span class="flex flex-row">
             <h1 class="font-code text-secondary">{msg.content}</h1>
@@ -151,8 +394,8 @@
             {/if}
           </span>
         {/each}
-      </span>
-      <span id="input">
+      </div>
+      <div id="input">
         <input
           onkeydown={(e) => {
             if (e.key === "Enter") {
@@ -191,7 +434,7 @@
           class="w-full font-code text-secondary bg-bg/20 mt-2 px-3 outline-none"
           type="text"
         />
-      </span>
+      </div>
     </div>
   </div>
   <footer class="text-secondary/55 font-title">

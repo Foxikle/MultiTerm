@@ -66,7 +66,7 @@ export async function PUT({ request, platform }) {
     if (!path || !content) {
       return Response.json({
         success: false,
-        "detail": "File path or content is missing"
+        detail: "File path or content is missing"
       }, {
         status: 400
       })
