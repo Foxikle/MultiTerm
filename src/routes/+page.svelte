@@ -248,7 +248,6 @@
             "- cat <file> - Print out of the contents of the specified file",
             "- rm <file> - Delete the specified file",
             "- tee <file> <contents> - Write the specified contents to the specified file",
-            "- chtag <add/remove> <file> <tags...> - Modify a file's tags",
             "- ls [query] - List the files in the specified directory. (Defaults to root)",
             "- help - Prints out this message :)",
           ],
