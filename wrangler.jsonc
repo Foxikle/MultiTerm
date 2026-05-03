@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "multiterm",
-  "compatibility_date": "2026-04-27",
+  "compatibility_date": "2026-05-03",
   "compatibility_flags": [
     "nodejs_als"
   ],
@@ -9,6 +9,9 @@
   "assets": {
     "binding": "ASSETS",
     "directory": ".svelte-kit/cloudflare"
+  },
+  "placement": {
+    "mode": "smart"
   },
   "workers_dev": false,
   "preview_urls": false,
@@ -19,5 +22,10 @@
       "database_id": "8994737e-c429-468c-805e-227607d70ba5",
       "remote": true
     }
-  ]
+  ],
+  "observability": {
+    "logs": {
+      "enabled": true
+    }
+  }
 }
