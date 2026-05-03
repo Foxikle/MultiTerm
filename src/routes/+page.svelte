@@ -344,7 +344,7 @@
   function renderTree(node: any, prefix = "", isRoot = true) {
     const lines = [];
 
-    if (isRoot) lines.push("/");
+    if (isRoot) lines.push("Root (/)");
 
     const entries = Object.entries(node).sort(([aKey, aVal], [bKey, bVal]) => {
       const aDir = aVal !== null;
@@ -354,13 +354,12 @@
     });
 
     entries.forEach(([name, children], idx) => {
-      const suffix = children !== null ? "/" : "";
       const isLast = idx === entries.length - 1;
-      const char = isLast ? "+--" : "+--";
-      const childPrefix = prefix + (isLast ? "    " : "│    ");
+      const char = isLast ? "\\--" : "+--";
+      const childPrefix = prefix + (isLast ? "   " : "│    ");
 
       if (name !== "") {
-        lines.push(prefix + char + name + suffix);
+        lines.push(prefix + char + name);
       }
 
       if (children !== null) {
@@ -388,7 +387,7 @@
       >
         {#each messages as msg}
           <span class="flex flex-row">
-            <h1 class="font-code text-secondary">{msg.content}</h1>
+            <pre class="font-code text-secondary">{msg.content}</pre>
             {#if msg.count > 1}
               <h1 class="font-code ml-1 text-secondary/50">({msg.count})</h1>
             {/if}
