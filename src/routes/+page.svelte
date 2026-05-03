@@ -26,13 +26,13 @@
   };
 
   const COMMANDS: Record<string, ParsedCommand> = {
-    touch: {
+    mkf: {
       async execute(args: string[]): Promise<ExecutionResult> {
         if (args.length < 1) {
           return {
             success: false,
             detail:
-              'Missing argument: File name. Usage "touch <filename> [content]"',
+              'Missing argument: File name. Usage "mkf <filename> [content]"',
             data: [],
           };
         }
@@ -69,13 +69,13 @@
         };
       },
     },
-    tee: {
+    svf: {
       async execute(args: string[]): Promise<ExecutionResult> {
         if (args.length < 2) {
           return {
             success: false,
             detail:
-              'Missing argument: File name and/or content. Usage: "tee <filename> <content>"',
+              'Missing argument: File name and/or content. Usage: "svf <filename> <content>"',
             data: [],
           };
         }
@@ -111,12 +111,12 @@
         };
       },
     },
-    cat: {
+    prt: {
       async execute(args: string[]): Promise<ExecutionResult> {
         if (args.length < 1) {
           return {
             success: false,
-            detail: 'Missing argument: File name. Usage "cat <filename>"',
+            detail: 'Missing argument: File name. Usage "prt <filename>"',
             data: [],
           };
         }
@@ -125,7 +125,7 @@
           return {
             success: false,
             detail:
-              'Cat only works on files, not directories. Use "ls" to list the files in a directory.',
+              'Prt only works on files, not directories. Use "list" to list the files in a directory.',
             data: [],
           };
         }
@@ -157,7 +157,7 @@
         };
       },
     },
-    ls: {
+    list: {
       async execute(args: string[]): Promise<ExecutionResult> {
         let path = "/";
         if (args.length >= 1) {
@@ -172,7 +172,7 @@
           return {
             success: false,
             detail:
-              'Ls only works with directories. Use "cat" to print out a file.',
+              'List only works with directories. Use "prt" to print out a file.',
             data: [],
           };
         }
@@ -180,7 +180,7 @@
         const resp: Response = await fetch("/api/files/", {
           method: "GET",
           headers: {
-            "X-File-Path": args[0],
+            "X-File-Path": path,
           },
         });
 
@@ -256,12 +256,12 @@
           success: true,
           data: [
             "Available Commands:",
-            "- touch <file> [contents] - Create a new file with the specified path and optional contents.",
+            "- mkf <file> [contents] - Create a new file with the specified path and optional contents.",
             "- clear - Clear the contents of this terminal",
-            "- cat <file> - Print out of the contents of the specified file",
+            "- prt <file> - Print out of the contents of the specified file",
             "- rm <file> - Delete the specified file",
-            "- tee <file> <contents> - Write the specified contents to the specified file",
-            "- ls [query] - List the files in the specified directory. (Defaults to root)",
+            "- svf <file> <contents> - Write the specified contents to the specified file",
+            "- list [query] - List the files in the specified directory. (Defaults to root)",
             "- help - Prints out this message :)",
           ],
         };
