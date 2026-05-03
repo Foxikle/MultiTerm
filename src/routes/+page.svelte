@@ -38,11 +38,7 @@
         }
 
         if (!args[0].startsWith("/")) {
-          return {
-            success: false,
-            detail: "File paths must be absolute (Start with /)",
-            data: [],
-          };
+          args[0] = "/" + args[0];
         }
 
         let content: string = "";
@@ -83,6 +79,10 @@
             data: [],
           };
         }
+        if (!args[0].startsWith("/")) {
+          args[0] = "/" + args[0];
+        }
+
         let content: string = "";
         if (args.length > 1) {
           content = args.slice(1).join(" ");
@@ -130,6 +130,10 @@
           };
         }
 
+        if (!args[0].startsWith("/")) {
+          args[0] = "/" + args[0];
+        }
+
         const resp: Response = await fetch("/api/files/", {
           method: "GET",
           headers: {
@@ -158,6 +162,10 @@
         let path = "/";
         if (args.length >= 1) {
           path = args[0];
+        }
+
+        if (!path.startsWith("/")) {
+          path = "/" + path;
         }
 
         if (!path.endsWith("/")) {
@@ -205,6 +213,11 @@
             data: [],
           };
         }
+
+        if (!args[0].startsWith("/")) {
+          args[0] = "/" + args[0];
+        }
+
         const resp: Response = await fetch("/api/files/", {
           method: "DELETE",
           headers: {
