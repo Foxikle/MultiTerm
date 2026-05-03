@@ -84,16 +84,19 @@
   let pastIndex: number = $state(0);
 
   function pushMessage(toPush: string): void {
-    let msg: Message = messages.at(messages.length - 1) ?? {
-      content: "",
-      count: 1,
-    };
+    let subset = messages.slice(-4);
 
-    if (msg.content !== toPush) {
-      messages.push({ content: toPush, count: 1 });
-    } else {
-      msg.count++;
+    for (const msg of subset) {
+      if (msg.content === toPush) {
+        msg.count++;
+        let idx = messages.lastIndexOf(msg);
+        messages.splice(idx, 1);
+        messages.push(msg);
+        return;
+      }
     }
+
+    messages.push({ content: toPush, count: 1 });
   }
 
   async function execute(value: string): Promise<void> {
@@ -152,7 +155,6 @@
       <span id="input">
         <input
           onkeydown={(e) => {
-            console.log($state.snapshot(pastCommands));
             if (e.key === "Enter") {
               execute(value);
               value = "";
@@ -162,7 +164,6 @@
               return;
             }
 
-            console.log(pastIndex);
             if (e.key === "ArrowUp") {
               if (pastIndex <= 0) return;
               if (pastIndex === pastCommands.length) {
