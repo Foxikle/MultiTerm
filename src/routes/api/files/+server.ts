@@ -1,14 +1,13 @@
-
 export async function GET({ request, platform }) {
-  console.log(request);
-
   try {
     let path = request.headers.get("x-file-path")
     if (path?.endsWith("/")) { // directory
       let data = await platform?.env.DB.prepare("SELECT * FROM FileSystem WHERE path LIKE ? || '%'")
         .bind(path).run();
       if (!data.results) {
-        return Response.json({ success: false, detail: "The requested directory does not contain any files." })
+        return Response.json({ success: false, detail: "The requested directory does not contain any files." }, {
+          status: 404
+        })
       }
       return Response.json({ success: true, data: data.results });
     }
@@ -103,3 +102,4 @@ export async function DELETE({ request, platform }) {
       { status: 500 });
   }
 }
+
